@@ -102,21 +102,18 @@
   <p class="gritty-item">
     <label class="label">Bijtelling</label>
     <input bind:value={bijtelling} type="number" class="input-text w-62 t-r" />
-    <br />
     <strong>{months * bijtelling}</strong>
   </p>
   <p>
     <label class="label">Verzekering</label>
     <input bind:value={insurance} type="number" class="input-text w-62 t-r" />
     <input type="checkbox" bind:checked={insurancePrivate} />
-    <br />
     <strong>{months * insurance}</strong>
   </p>
   <p>
     <label class="label">Wegenbelasting</label>
     <input bind:value={roadTax} type="number" class="input-text w-62 t-r" />
     <input type="checkbox" bind:checked={roadTaxPrivate} />
-    <br />
     <span>{12 * roadTax} p/j</span>
     <span>{months * roadTax}</span>
     <strong>{roadTaxTotal.toFixed(2)}</strong>
@@ -126,7 +123,6 @@
     <label class="label">Brandstof</label>
     <input bind:value={fuel} type="number" class="input-text w-62 t-r" />
     <input type="checkbox" bind:checked={fuelPrivate} />
-    <br />
     <strong>{months * fuel}</strong>
   </p>
 
@@ -134,7 +130,6 @@
     <label class="label">Onderhoud</label>
     <input type="number" bind:value={main_py} />
     <input type="checkbox" bind:checked={main_py_private} />
-    <br />
     <strong>{months * (main_py / 12)}</strong>
   </p>
 
@@ -144,14 +139,12 @@
       <span style="color: #999">{(kmsVerg_py / 0.19).toFixed(2)} km/j</span>
     </label>
     <input type="number" bind:value={kmsVerg_py} />
-    <br />
     <strong>{months * (kmsVerg_py / 12)}</strong>
   </p>
 
   <p>
     <label class="label">Afschrijving per jaar</label>
     <input type="number" bind:value={writeOffPerYear} />
-    <br />
     <strong>{months * (writeOffPerYear / 12)}</strong>
   </p>
 
