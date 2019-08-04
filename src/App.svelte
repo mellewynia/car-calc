@@ -17,7 +17,7 @@
   $: insuranceTotal = (insurance * months * (insurancePrivate ? taxMult : 1));
   
   let roadTaxPrivate = true;
-  let roadTax = 74;
+  let roadTax = 67;
   $: roadTaxTotal = (roadTax * months * (roadTaxPrivate ? taxMult : 1));
   
   let fuelPrivate = true;
@@ -49,24 +49,58 @@
     - kmsVergTotal;
 </script>
 
-<h1>dga calc</h1>
-
 <style>
   .gritty {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    grid-template-columns: repeat(5, 120px) repeat(3, 1fr);
+    /* 
+			What happens here:
+			We're repeating 5 times a column of 120px and 3 times a column of 1fr.
+			this is the same as writing:
+			120px 120px 120px 120px 120px 1fr 1fr 1fr. 
+			Every one of these can also have any other preferred value.
+		 */
   }
 
-  .label { font-size: 11px; color: #333; text-transform: uppercase; letter-spacing: 0.2px; font-weight: bold; }
-  .label-normal { text-transform: none; letter-spacing: 0; }
-  
-  .input-text { height: 26px; font-size: 14px; }
-  .input-text:hover { box-shadow: 0 0 0 2px grey; }
-  .input-text:focus { box-shadow: 0 0 0 2px blue; }
-  .t-r { text-align: right; }
-  .w-62 { width: 62px; }
-  .w-62 { width: 62px; }
+  .gritty-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .label {
+    font-size: 11px;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    font-weight: bold;
+  }
+
+  .label-normal {
+	  text-transform: none; letter-spacing: 0;
+	}
+
+  .input-text {
+    height: 26px;
+    font-size: 14px;
+  }
+  .input-text:hover {
+    box-shadow: 0 0 0 2px grey;
+  }
+  .input-text:focus {
+    box-shadow: 0 0 0 2px blue;
+  }
+  .t-r {
+    text-align: right;
+  }
+  .w-62 {
+    width: 62px;
+  }
+  .w-62 {
+    width: 62px;
+  }
 </style>
+
+<h1>dga calc</h1>
 
 <p>
   <label class="label">Looptijd: <span class="label-normal">{months} maanden ({(months / 12).toFixed(1)} jaar)</span></label><br />
@@ -93,22 +127,21 @@
   <input type="range" min="0" max="1" step="0.01" bind:value="{kms_verg_private}"/>
 </p>
 
-
 <div>
   Toyota Auris
 </div>
 <div class="gritty">
   <p class="gritty-item">
     <label class="label">Bijtelling</label>
-    <input bind:value="{bijtelling}" type="number" class="input-text w-62 t-r"><br/>
+    <input bind:value={bijtelling} type="number" class="input-text w-62 t-r"><br/>
     <strong>{ months * bijtelling }</strong>
   </p>
   <p>
     <label class="label">
       Verzekering
     </label>
-    <input bind:value="{insurance}" type="number" class="input-text w-62 t-r">
-    <input type="checkbox" bind:checked="{insurancePrivate}">
+    <input bind:value={insurance} type="number" class="input-text w-62 t-r">
+    <input type="checkbox" bind:checked={insurancePrivate}>
       <br/>
     <strong>{ months * insurance }</strong>
   </p>
@@ -116,25 +149,24 @@
     <label class="label">
       Wegenb.
     </label>
-    <input bind:value="{roadTax}" type="number" class="input-text w-62 t-r">
-    <input type="checkbox" bind:checked="{roadTaxPrivate}">
-    <br/>
-    <span>{ 12 * roadTax} p/j</span>
-    <span>{ months * roadTax }</span>
-    <strong>{ roadTaxTotal.toFixed(2) }</strong>
+    <input bind:value={roadTax} type="number" class="input-text w-62 t-r" />
+    <input type="checkbox" bind:checked={roadTaxPrivate} />
+    <span>{12 * roadTax} p/j</span>
+    <span>{months * roadTax}</span>
+    <strong>{roadTaxTotal.toFixed(2)}</strong>
   </p>
 
   <p>
     <label class="label">Brandstof</label>
-    <input bind:value="{fuel}" type="number" class="input-text w-62 t-r">
+    <input bind:value={fuel} type="number" class="input-text w-62 t-r">
     <input type="checkbox" bind:checked="{fuelPrivate}">
     <br/>
-    <strong>{ months * fuel }</strong>
+    <strong>{months * fuel}</strong>
   </p>
 
   <p>
     <label class="label">Onderhoud</label>
-    <input bind:value="{main_py}" type="number" class="input-text w-62 t-r">
+    <input bind:value={main_py} type="number" class="input-text w-62 t-r">
     <input type="checkbox" bind:checked={main_py_private}/><br/>
     <strong>{ months * (main_py / 12) }</strong>
   </p>
@@ -144,24 +176,21 @@
       Kilometervergoeding
       <span style="color: #999">{(kmsVerg_py / 0.19).toFixed(2)} km/j</span>
     </label>
-    <input bind:value="{kmsVerg_py}" type="number" class="input-text w-62 t-r"><br/>
-    <strong>{ months * (kmsVerg_py / 12) } </strong>
+    <input bind:value={kmsVerg_py} type="number" class="input-text w-62 t-r" />
+    <strong>{months * (kmsVerg_py / 12)}</strong>
   </p>
 
   <p>
     <label class="label">
       Afschrijving per jaar
     </label>
-    <input bind:value="{writeOffPerYear}" type="number" class="input-text w-62 t-r"><br/>
+    <input bind:value={writeOffPerYear} type="number" class="input-text w-62 t-r" />
     <strong>{ months * (writeOffPerYear / 12) }</strong>
   </p>
 
   <div>
-  
+
     <hr />
     € {(totalPrivate * -1).toFixed(2)} Benodigd bruto inkomen
   </div>
 </div>
-
-
-
