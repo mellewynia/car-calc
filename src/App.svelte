@@ -3,7 +3,11 @@
 	let privateCar = true;
 	
 	let taxPressure = 0.5;
-	$: taxMult = (1 / taxPressure); 
+	$: taxMult = (1 / taxPressure);
+
+	let kms_py = 17500; 
+	let kms_ratio_private = 0.8; 
+	let kms_verg_private = 0.19; 
 	
 	let monthsPrivate = true;
 	let months = 60;
@@ -54,6 +58,7 @@
 	}
 
 	.label { font-size: 11px; color: #333; text-transform: uppercase; letter-spacing: 0.2px; font-weight: bold; }
+	.label-normal { text-transform: none; letter-spacing: 0; }
 	
 	.input-text { height: 26px; font-size: 14px; }
 	.input-text:hover { box-shadow: 0 0 0 2px grey; }
@@ -63,15 +68,38 @@
 	.w-62 { width: 62px; }
 </style>
 
+<p>
+	<label class="label">Looptijd: <span class="label-normal">{months} maanden ({(months / 12).toFixed(1)} jaar)</span></label><br />
+	<input type="range" min="0" max="120" bind:value="{months}"/><br/>
+	<button on:click={() => { months = 12; }}>1 jr</button>
+	<button on:click={() => { months = 12 * 2; }}>2 jr</button>
+	<button on:click={() => { months = 12 * 3; }}>3 jr</button>
+	<button on:click={() => { months = 12 * 5; }}>5 jr</button>
+	<button on:click={() => { months = 12 * 10; }}>10 jr</button>
+</p>
 
-<label>Maanden: {months} ({(months / 12).toFixed(1)} jaar)</label>
-<input type="range" min="0" max="60" bind:value="{months}"/>
+<p>
+	<label class="label">Kilometers p/j: <span class="label-normal">{kms_py} km</span></label><br />
+	<input type="range" min="0" max="150000" bind:value="{kms_py}"/>
+</p>
 
+<p>
+	<label class="label">Privé kilometers ratio: <span class="label-normal">{(kms_ratio_private * 100).toFixed(0)} %</span></label><br />
+	<input type="range" min="0" max="1" step="0.05" bind:value="{kms_ratio_private}"/>
+</p>
+
+<p>
+	<label class="label">Privé kilometers verg: <span class="label-normal">€ {(kms_verg_private).toFixed(2)}</span></label><br />
+	<input type="range" min="0" max="1" step="0.01" bind:value="{kms_verg_private}"/>
+</p>
+
+
+<div>
+	Toyota Auris
+</div>
 <div class="gritty">
 	<p class="gritty-item">
-		<label class="label">
-			Bijtelling
-		</label>
+		<label class="label">Bijtelling</label>
 		<input bind:value="{bijtelling}" type="number" class="input-text w-62 t-r"><br/>
 		<strong>{ months * bijtelling }</strong>
 	</p>
@@ -86,7 +114,7 @@
 	</p>
 	<p>
 		<label class="label">
-			Wegenbelasting
+			Wegenb.
 		</label>
 		<input bind:value="{roadTax}" type="number" class="input-text w-62 t-r">
 		<input type="checkbox" bind:checked="{roadTaxPrivate}">
@@ -106,7 +134,7 @@
 
 	<p>
 		<label class="label">Onderhoud</label>
-		<input type="number" bind:value="{main_py}">
+		<input bind:value="{main_py}" type="number" class="input-text w-62 t-r">
 		<input type="checkbox" bind:checked={main_py_private}/><br/>
 		<strong>{ months * (main_py / 12) }</strong>
 	</p>
@@ -116,7 +144,7 @@
 			Kilometervergoeding
 			<span style="color: #999">{(kmsVerg_py / 0.19).toFixed(2)} km/j</span>
 		</label>
-		<input type="number" bind:value="{kmsVerg_py}"><br/>
+		<input bind:value="{kmsVerg_py}" type="number" class="input-text w-62 t-r"><br/>
 		<strong>{ months * (kmsVerg_py / 12) } </strong>
 	</p>
 
@@ -124,7 +152,7 @@
 		<label class="label">
 			Afschrijving per jaar
 		</label>
-		<input type="number" bind:value="{writeOffPerYear}"><br/>
+		<input bind:value="{writeOffPerYear}" type="number" class="input-text w-62 t-r"><br/>
 		<strong>{ months * (writeOffPerYear / 12) }</strong>
 	</p>
 
