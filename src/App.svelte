@@ -96,39 +96,44 @@
 		<strong>{ roadTaxTotal.toFixed(2) }</strong>
 	</p>
 
+	<p>
+		<label class="label">Brandstof</label>
+		<input bind:value="{fuel}" type="number" class="input-text w-62 t-r">
+		<input type="checkbox" bind:checked="{fuelPrivate}">
+		<br/>
+		<strong>{ months * fuel }</strong>
+	</p>
+
+	<p>
+		<label class="label">Onderhoud</label>
+		<input type="number" bind:value="{main_py}">
+		<input type="checkbox" bind:checked={main_py_private}/><br/>
+		<strong>{ months * (main_py / 12) }</strong>
+	</p>
+
+	<p>
+		<label class="label">
+			Kilometervergoeding
+			<span style="color: #999">{(kmsVerg_py / 0.19).toFixed(2)} km/j</span>
+		</label>
+		<input type="number" bind:value="{kmsVerg_py}"><br/>
+		<strong>{ months * (kmsVerg_py / 12) } </strong>
+	</p>
+
+	<p>
+		<label class="label">
+			Afschrijving per jaar
+		</label>
+		<input type="number" bind:value="{writeOffPerYear}"><br/>
+		<strong>{ months * (writeOffPerYear / 12) }</strong>
+	</p>
+
 	<div>
 	
 		<hr />
 		€ {(totalPrivate * -1).toFixed(2)} Benodigd bruto inkomen
 	</div>
 </div>
-
-	<h5>
-		Brandstof
-		<input type="checkbox" bind:checked="{fuelPrivate}">
-	</h5>
-	<input type="number" bind:value="{fuel}"><br/>
-	<strong>{ months * fuel }</strong>
-
-	<h5>
-		Onderhoud
-		<input type="checkbox" bind:checked={main_py_private}/>
-	</h5>
-	<input type="number" bind:value="{main_py}"><br/>
-	<strong>{ months * (main_py / 12) }</strong>
-
-	<h5>
-		Kilometervergoeding
-		<span style="color: #999">{(kmsVerg_py / 0.19).toFixed(2)} km/j</span>
-	</h5>
-	<input type="number" bind:value="{kmsVerg_py}"><br/>
-	<strong>{ months * (kmsVerg_py / 12) } </strong>
-
-	<h5>
-		Afschrijving per jaar
-	</h5>
-	<input type="number" bind:value="{writeOffPerYear}"><br/>
-	<strong>{ months * (writeOffPerYear / 12) }</strong>
 
 
 
