@@ -60,6 +60,11 @@
 		 */
   }
 
+  .gritty-item {
+    display: flex;
+    flex-direction: column;
+  }
+
   .label {
     font-size: 11px;
     color: #333;
