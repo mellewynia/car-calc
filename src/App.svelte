@@ -268,7 +268,7 @@
 </section>
 
 <div class="calc-header">
-  Toyota Auris
+  Autokosten. &nbsp; Waarde:
   <input bind:value={carValue} type="number" class="input-text input-text---tiny w-60 t-r" />
   <label class="label"><input type="checkbox" bind:checked={carPrivate}> Privé</label>
   &nbsp; &nbsp; &nbsp;
