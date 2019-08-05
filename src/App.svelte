@@ -1,7 +1,10 @@
 
 <script>
-  let privateCar = true;
-  let carCost = 0;
+  let carPrivate = false;
+  let carValue = 0;
+  $: carValueBusiness = carPrivate ? 0 : carValue;
+  $: carValuePrivate = carPrivate ? carValue * taxMult : 0;
+  let carValueRisidual = 0;
   
   let taxPressure = 0.52;
   // General settings
@@ -23,7 +26,7 @@
   let writeOffPrivate = true;
   let writeOff = 2000;
   $: writeOffTotal = (writeOff / 12) * months;
-  $: writeOffTotalBusiness = writeOffPrivate ? 0 : writeOffTotalBusiness;
+  $: writeOffTotalBusiness = writeOffPrivate ? 0 : writeOffTotal;
   $: writeOffTotalPrivate = writeOffPrivate ? (writeOffTotal * taxMult) : 0;
 
   // Bijtelling
@@ -57,8 +60,10 @@
   let unitCost = 1.70;
   let unitKms = 21;
   let fuelPrivate = true;
-  $: unitKmCost = unitCost / unitKms;
-  $: fuelTotal = (unitKmCost * kms_py);
+  $: unitKmCost =  unitCost / unitKms;
+  $: fuelTotalPY = (unitKmCost * kms_py);
+  $: fuelTotal = (fuelTotalPY / 12) * months;
+  $: fuelTotalInput = fuelTotalPY.toFixed(2);
   $: fuelTotalBusiness = fuelPrivate ? 0 : fuelTotal;
   $: fuelTotalPrivate = fuelPrivate ? fuelTotal * taxMult : 0;
 
@@ -66,28 +71,38 @@
   $: km_verg_py = bijtelling > 0 ? 0 : kms_py * kms_ratio_private * kms_verg_private;
   $: km_verg_total = bijtelling > 0 ? 0 : (km_verg_py / 12) * months;
   
+  $: total = 0
+    + carValue
+    + leaseTotal
+    + writeOffTotal
+    + insuranceTotal
+    + roadTaxTotal
+    + mainTotal
+    + fuelTotal;
+
   $: totalBusiness = 0
-    + (leasePrivate       ? 0 : lease_pm * months)
-    + (insurancePrivate   ? 0 : insurance * months)
-    + (roadTaxPrivate     ? 0 : roadTax * months)
-    + (main_py_private    ? 0 : (main_py / 12) * months)
-    + (writeOffPrivate ? 0 : (writeOff / 12) * months)
-    + (fuelPrivate        ? 0 : (fuelTotal / 12) * months)
-    // Only km if ! leasePrivate
-    + (! leasePrivate     ? (km_verg_py / 12) * months : 0)
-  ;
+    + carValueBusiness
+    + leaseTotalBusiness
+    + writeOffTotalBusiness
+    + insuranceTotalBusiness
+    + roadTaxTotalBusiness
+    + mainTotalBusiness
+    + fuelTotalBusiness;
+
+  $: totalBusinessBtw = (totalBusiness - ((totalBusiness / 121) * 100));
+  $: totalBusinessWB = (totalBusiness - totalBusinessBtw) * 0.19;
+  $: totalBusinessAfterTax = totalBusiness - totalBusinessBtw - totalBusinessWB;
 
   $: totalPrivate = 0
-    + (leasePrivate       ? lease_pm * months : 0)
-    + (insurancePrivate   ? insurance * months : 0)
-    + (roadTaxPrivate     ? roadTax * months : 0)
-    + (main_py_private    ? ((main_py / 12) * months) : 0)
-    + (writeOffPrivate ? (writeOff / 12) * months : 0)
-    + ((bijtelling / 12) * months)
-    + (fuelPrivate        ? (fuelTotal / 12) * months : 0)
-  ;
-
-  $: totalPrivateBeforeTaxes = totalPrivate * taxMult;
+    + carValuePrivate
+    + leaseTotalPrivate
+    + writeOffTotalPrivate
+    + bijtellingTotalPrivate
+    + insuranceTotalPrivate
+    + roadTaxTotalPrivate
+    + mainTotalPrivate
+    + fuelTotalPrivate;
+    
 </script>
 
 <style>
@@ -99,6 +114,12 @@
 
   .general-settings > * { margin: 0; width: 262px; }
 
+  .btn-pres { display: flex; }
+  .btn-pre { background: #ddd; color: #666; font-size: 11px; margin-left: 1px; padding: 1px 5px; border-radius: 0; border: 0; transition: 262ms ease-out; }
+  .btn-pre:first-child { border-radius: 3px 0 0 3px; margin-left: 0; }
+  .btn-pre:last-child { border-radius: 0 3px 3px 0; }
+  .btn-pre.isActive { background: blue; color: #fff; transition: none; }
+
   .calc-header {
     margin: 20px 0 0 78px;
   }
@@ -107,7 +128,7 @@
     display: grid;
     margin-top: 14px;
     grid-column-gap: 16px;
-    grid-template-columns: 62px repeat(10, 94px) repeat(1, 1fr);
+    grid-template-columns: 62px repeat(10, 84px) repeat(1, 1fr);
     /* 
 			What happens here:
 			We're repeating 5 times a column of 120px and 3 times a column of 1fr.
@@ -136,6 +157,10 @@
   .input-text {
     height: 26px;
     font-size: 14px;
+  }
+
+  .input-text[type="number"] {
+    padding-right: 1px;
   }
 
   .input-text---tiny {
@@ -167,7 +192,7 @@
     width: 60px;
   }
   .w-62 {
-    width: 94px;
+    width: 84px;
   }
 
   .m-b-xxs { margin-bottom: 2px; }
@@ -183,8 +208,13 @@
     font-size: 13px;
     text-align: right;
   }
+
+  .sum-placeholder.faded {
+    color: #999;
+  }
+
   .sum {
-    padding: 2px 18px 2px 0;
+    padding: 2px 0 2px 0;
     position: relative;
     font-size: 13px;
     text-align: right;
@@ -198,31 +228,33 @@
     font-size: 11px;
     color: #999;
   }
-
-  .sum__right {
-    position: absolute;
-    top: 3px;
-    right: 0;
-    font-size: 11px;
-    color: #999;
-  }
 </style>
 
 <section class="general-settings">
-  <p>
+  <div>
     <label class="label">Looptijd: <span class="label-normal">{months} maanden ({(months / 12).toFixed(1)} jaar)</span></label><br />
-    <input type="range" min="0" max="120" bind:value="{months}"/><br/>
-    <button on:click={() => { months = 12; }}>1 jr</button>
-    <button on:click={() => { months = 12 * 2; }}>2 jr</button>
-    <button on:click={() => { months = 12 * 3; }}>3 jr</button>
-    <button on:click={() => { months = 12 * 5; }}>5 jr</button>
-    <button on:click={() => { months = 12 * 10; }}>10 jr</button>
-  </p>
+    <input type="range" min="0" max="120" bind:value="{months}"/>
+    <div class="btn-pres">
+      <button on:click={() => { months = 12; }} class="btn-pre" class:isActive={months === 12}>1 jr</button>
+      <button on:click={() => { months = 12 * 2; }} class="btn-pre" class:isActive={months === 12 * 2}>2 jr</button>
+      <button on:click={() => { months = 12 * 3; }} class="btn-pre" class:isActive={months === 12 * 3}>3 jr</button>
+      <button on:click={() => { months = 12 * 5; }} class="btn-pre" class:isActive={months === 12 * 5}>5 jr</button>
+      <button on:click={() => { months = 12 * 10; }} class="btn-pre" class:isActive={months === 12 * 10}>10 jr</button>
+    </div>
+  </div>
 
-  <p>
+  <div>
     <label class="label">Kilometers p/j: <span class="label-normal">{kms_py} km</span></label><br />
     <input type="range" min="0" max="100000" step="500" bind:value="{kms_py}"/>
-  </p>
+    <div class="btn-pres">
+      <button on:click={() => { kms_py = 10000; }} class="btn-pre" class:isActive={kms_py === 10000}>10</button>
+      <button on:click={() => { kms_py = 15000; }} class="btn-pre" class:isActive={kms_py === 15000}>15</button>
+      <button on:click={() => { kms_py = 25000; }} class="btn-pre" class:isActive={kms_py === 25000}>25</button>
+      <button on:click={() => { kms_py = 35000; }} class="btn-pre" class:isActive={kms_py === 35000}>35</button>
+      <button on:click={() => { kms_py = 50000; }} class="btn-pre" class:isActive={kms_py === 50000}>50</button>
+      <button on:click={() => { kms_py = 70000; }} class="btn-pre" class:isActive={kms_py === 70000}>70</button>
+    </div>
+  </div>
 
   <p>
     <label class="label">Privé kilometers ratio: <span class="label-normal">{(kms_ratio_private * 100).toFixed(0)} %</span></label><br />
@@ -237,10 +269,11 @@
 
 <div class="calc-header">
   Toyota Auris
-  <input bind:value={carCost} type="number" class="input-text input-text---tiny w-60 t-r" />
-
+  <input bind:value={carValue} type="number" class="input-text input-text---tiny w-60 t-r" />
+  <label class="label"><input type="checkbox" bind:checked={carPrivate}> Privé</label>
+  &nbsp; &nbsp; &nbsp;
   <input bind:value={unitKms} type="number" class="input-text input-text---tiny w-48 t-r" />
-  kms per
+  kms per €
   <input bind:value={unitCost} type="string" class="input-text input-text---tiny w-48 t-r" />
 </div>
  
@@ -250,8 +283,8 @@
       &nbsp;
     </label>
     <input style="opacity: 0;" bind:value={lease_pm} type="number" disabled class="input-text w-62 t-r" />
-    <div class="sum" style="opacity: 0;">&nbsp;</div>
-    <div class="sum b-t-sub-sub" style="opacity: 0;">&nbsp;</div>
+    <div class="sum-placeholder faded" style="">p/j</div>
+    <div class="sum-placeholder faded b-t-sub-sub">subtotal</div>
 
     <label class="label db" style="opacity: 0;"><input type="checkbox" disabled> Privé</label>
     <div class="sum-placeholder b-t-sub">zakelijk</div>
@@ -263,7 +296,7 @@
       Leasebedrag
     </label>
     <input bind:value={lease_pm} type="number" class="input-text w-62 t-r" />
-    <div class="sum">{lease_py.toFixed(2)} <span class="sum__right">p/j</span></div>
+    <div class="sum">{lease_py.toFixed(2)}</div>
     <div class="sum b-t-sub-sub">{leaseTotal.toFixed(2)}</div>
 
     <label class="label db"><input type="checkbox" bind:checked={leasePrivate}> Privé</label>
@@ -276,7 +309,7 @@
       Afschrijving per jaar
     </label>
     <input bind:value={writeOff} type="number" class="input-text w-62 t-r" />
-    <div class="sum">{writeOff.toFixed(2)} <span class="sum__right">p/j</span></div>
+    <div class="sum">{writeOff.toFixed(2)}</div>
     <div class="sum b-t-sub-sub">{writeOffTotal.toFixed(2)}</div>
 
     <label class="label db"><input type="checkbox" bind:checked={writeOffPrivate}> Privé</label>
@@ -289,7 +322,7 @@
       Bijtelling
     </label>
     <input bind:value={bijtelling} type="number" class="input-text w-62 t-r">
-    <div class="sum">{bijtelling.toFixed(2)} <span class="sum__right">p/j</span></div>
+    <div class="sum">{bijtelling.toFixed(2)}</div>
     <div class="sum b-t-sub-sub">{bijtellingTotal.toFixed(2)}</div>
     
     <label class="label db" style="opacity: 0;"><input type="checkbox" checked disabled/> Privé</label>
@@ -302,7 +335,7 @@
       Verzekering
     </label>
     <input bind:value={insurance} type="number" class="input-text w-62 t-r">
-    <div class="sum">{12 * insurance} <span class="sum__right">p/j</span></div>
+    <div class="sum">{(12 * insurance).toFixed(2)}</div>
     <div class="sum b-t-sub-sub">{insuranceTotal.toFixed(2)}</div>
 
     <label class="label db"><input type="checkbox" bind:checked={insurancePrivate} /> Privé</label>
@@ -315,7 +348,7 @@
       Wegenb.
     </label>
     <input bind:value={roadTax} type="number" class="input-text w-62 t-r" />
-    <div class="sum">{12 * roadTax} <span class="sum__right">p/j</span></div>
+    <div class="sum">{12 * roadTax}</div>
     <div class="sum b-t-sub-sub">{roadTaxTotal.toFixed(2)}</div>
 
     <label class="label db"><input type="checkbox" bind:checked={roadTaxPrivate} /> Privé</label>
@@ -328,7 +361,7 @@
       Onderhoud
     </label>
     <input bind:value={main_py} type="number" class="input-text w-62 t-r">
-    <div class="sum">{main_py.toFixed(2)} <span class="sum__right">p/j</span></div>
+    <div class="sum">{main_py.toFixed(2)}</div>
     <div class="sum b-t-sub-sub">{mainTotal.toFixed(2)}</div>
 
     <label class="label db"><input type="checkbox" bind:checked={main_py_private}/> Privé</label>
@@ -340,8 +373,8 @@
     <label class="label t-ellipsis d-b m-b-xs">
       (Brand)stof
     </label>
-    <input bind:value={fuelTotal} disabled="true" type="number" class="input-text w-62 t-r" />
-    <div class="sum">{(fuelTotal).toFixed(2)} <span class="sum__right">p/j</span></div> 
+    <input bind:value={fuelTotalInput} disabled="true" type="number" class="input-text w-62 t-r" />
+    <div class="sum">{(fuelTotalPY).toFixed(2)}</div> 
     <div class="sum b-t-sub-sub">{fuelTotal.toFixed(2)}</div>
 
     <label class="label db"><input type="checkbox" bind:checked={fuelPrivate}/> Privé</label>
@@ -354,17 +387,35 @@
       Km-vergoed.
     </label>
     <input bind:value={km_verg_py} disabled="true" type="number" class="input-text w-62 t-r" />
-    <div class="sum">{km_verg_py.toFixed(2)} <span class="sum__right">p/j</span></div>
+    <div class="sum">{km_verg_py.toFixed(2)}</div>
     <div class="sum b-t-sub-sub">{(months * (km_verg_py / 12)).toFixed(2)}</div>
-    <div class="sum b-t-sub">{km_verg_total.toFixed(2)}</div>
+
+    <label class="label db"><input type="checkbox" checked disabled/> Privé</label>
+    <div class="sum b-t-sub">- {km_verg_total.toFixed(2)}</div>
+    <div class="sum b-t-sub">+ {km_verg_total.toFixed(2)}</div>
   </div>
 </div>
 <br/>
 <br/>
 <div>
-  <div>Zakelijke kosten: € {totalBusiness.toFixed(2)} </div> <!-- TODO: verreken met omzetbelasting -->
-  <!-- TODO: btw aftrek vanuit privé (main, fuel) -->
-  <div>Privé kosten: € {totalPrivate.toFixed(2)}</div>
-  <div>Privé kosten (bruto): € {totalPrivateBeforeTaxes.toFixed(2)}</div>
+  <div>Zakelijke kosten: € {totalBusiness.toFixed(2)}</div>
+  <div>
+    <small>
+      Minder omzetbelasting: {totalBusinessBtw.toFixed(2)}<br/>
+      Minder winstbelasting: {totalBusinessWB.toFixed(2)}<br/>
+      Uiteindelijke kosten: <strong>{totalBusinessAfterTax.toFixed(2)}</strong><br/>
+    </small>
+  </div>
+  <hr/>
+  <div>
+    Privé kosten: € {#if (bijtellingTotalPrivate > 0)}
+      {bijtellingTotal.toFixed(2)}
+    {:else}
+      {total.toFixed(2)}
+    {/if}<br/>
+    <small>
+      Privé kosten (bruto): € {totalPrivate.toFixed(2)}
+    </small>
+  </div>
   <div>Km-vergoeding: € {bijtelling === 0 ? km_verg_total.toFixed(2) : 0}</div>
 </div>
